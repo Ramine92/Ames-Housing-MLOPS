@@ -1,0 +1,33 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+ml_project_env/
+
+# Data and models
+data/
+ml/data/
+*.csv
+*.parquet
+*.pkl
+*.model
+*.joblib
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+test_impute.py
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
