@@ -3,14 +3,18 @@ from sklearn.linear_model import Ridge,LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
+from sklearn.metrics import r2_score,mean_squared_error,root_mean_squared_error
 from pathlib import Path
+import numpy as np
+import joblib
 import pandas as pd 
 
 
 BASE_DIR = Path(__file__).parent.parent # root directory
+DATA_PATH = BASE_DIR / "ml" / "raw" / "train.csv" 
 
-def load_data():
-    df = pd.read_csv("../data/raw/train.csv")
+def load_data(data_path=DATA_PATH):
+    df = pd.read_csv(DATA_PATH)
     X = df.drop(columns=["Log_SalePrice","SalePrice"])
     y = df["Log_SalePrice"]
     return X,y
@@ -31,33 +35,55 @@ def get_pipeline(X,model_name):
         ("num_transformer",numerical_transformer,numerical_columns)
     ])
     if model_name == "Ridge":
-        pipeline = Pipeline(steps=[
-            ("preprocessor",preprocessor),
-            ("model",Ridge())
-        ])
+        model = Ridge()
+    elif model_name == "LinearRegression":
+        model = LinearRegression()
     pipeline = Pipeline(steps=[
         ("preprocessor",preprocessor),
-        ("model",Ridge())
+        ("model",model)
     ])
-
     return pipeline
 
-def train_model(X,y,model):
+def train_model(X,y,model_name):
     X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2)
     grid_params = {
         "model__alpha":[0.1,1.0,10.0,50.0,100.0,200.0]
     }
-    pipeline = get_pipeline(X_train,model)
-    if model == "Ridge":
-        gs_pipeline = GridSearchCV(estimator=pipeline,grid_params=grid_params,cv=5,n_jobs=-1,scoring="neg_root_mean_squared_error")
-        gs_pipeline.fit(X_train,y_train)
+    pipeline = get_pipeline(X_train,model_name)
+    if model_name == "Ridge":
+        model = GridSearchCV(estimator=pipeline,param_grid=grid_params,cv=5,n_jobs=-1,scoring="neg_root_mean_squared_error")
+        model.fit(X_train,y_train)
     else:
-        pipeline.fit(X_train,y_train)
+        model = pipeline
+        model.fit(X_train,y_train)
+    
+    return model,X_test,y_test
 
-    scoring = ["r2_score","mean_squared_error","root_mean_squared_error"]
-    cv_results = cross_validate(gs_pipeline,X_train,y_train,cv=5,scoring=scoring,return_train_score=True)
-    results = {"r2_score":cv_results["r2_score"].mean(),"mean_squared_error":cv_results["mean_squared_error"].mean(),"root_mean_squared_error":cv_results["root_mean_squared_error"].mean()}
-    return gs_pipeline if model == "Ridge" else pipeline
+def evaluate_model(model,X_test,y_test):
+    y_preds = model.predict(X_test)
+    r2_scoring = r2_score(y_test,y_preds)
+    mse = mean_squared_error(y_test,y_preds)
+    rmse = np.sqrt(mse)
+    results = {"r2_score":r2_scoring,"mean_squared_error":mse,"root_mean_squared_error":rmse}
+    return results
+
+def save_model(model,model_name,version):
+    artifacts_path = BASE_DIR / "ml" / "models" / "artifacts"
+    artifacts_path.mkdir(parents=True,exist_ok=True)
+    joblib.dump(model, artifacts_path / f"{model_name}_{version}.pkl")
+    print(f"model saved succefully {model_name}")
+if __name__ == "__main__":
+    X,y = load_data(DATA_PATH)
+    model_name = "Ridge"
+    version = "v1"
+    model,X_test,y_test = train_model(X,y,model_name)
+    rs = evaluate_model(model,X_test,y_test)
+    print(rs)
+    save_model(model,model_name,version)
+
+
+
+
     
 
 
