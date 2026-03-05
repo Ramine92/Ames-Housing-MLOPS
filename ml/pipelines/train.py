@@ -1,33 +1,47 @@
+from pandas.core.common import random_state
 from sklearn.model_selection import GridSearchCV,train_test_split,cross_validate
 from sklearn.linear_model import Ridge,LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
 from sklearn.metrics import r2_score,mean_squared_error,root_mean_squared_error
+from ml.features.preprocessing import housing_preprocessor
 from pathlib import Path
 import numpy as np
 import joblib
 import pandas as pd 
 
 
-BASE_DIR = Path(__file__).parent.parent # root directory
-DATA_PATH = BASE_DIR / "ml" / "raw" / "train.csv" 
+BASE_DIR = Path(__file__).parent.parent.parent # root directory
+DATA_PATH = BASE_DIR / "ml" / "data" / "raw" / "train.csv" 
 
 def load_data(data_path=DATA_PATH):
     df = pd.read_csv(DATA_PATH)
-    X = df.drop(columns=["Log_SalePrice","SalePrice"])
-    y = df["Log_SalePrice"]
+    
+    if "Log_SalePrice" not in df.columns:
+        X = df.drop(columns=["SalePrice"])
+        y = np.log1p(df["SalePrice"])
+    else:
+        X = df.drop(columns=["Log_SalePrice","SalePrice"])
+        y = df["Log_SalePrice"]
     return X,y
 
 def get_pipeline(X,model_name):
-    categorical_columns = X.select_dtypes(include="object").columns
-    numerical_columns = X.select_dtypes(exclude="object").columns
+
+    X_engineered = housing_preprocessor.fit_transform(X)
+    categorical_columns = X_engineered.select_dtypes(include="object").columns
+    numerical_columns = X_engineered.select_dtypes(exclude="object").columns
 
     categorical_transformer = Pipeline(steps=[
-        ("one_hot",OneHotEncoder(handle_unknown="ignore")),
+        ("cat_imputer",SimpleImputer(strategy="constant",fill_value="missing")),
+        ("one_hot",OneHotEncoder(handle_unknown="ignore"))
+        
     ])
     numerical_transformer = Pipeline(steps=[
+        ("num_imputer",SimpleImputer(strategy="median")),
         ("scaler",StandardScaler())
+        
     ])
 
     preprocessor = ColumnTransformer(transformers=[
@@ -35,12 +49,14 @@ def get_pipeline(X,model_name):
         ("num_transformer",numerical_transformer,numerical_columns)
     ])
     if model_name == "Ridge":
-        model = Ridge()
+        model = Ridge(random_state=42)
     elif model_name == "LinearRegression":
-        model = LinearRegression()
+        model = LinearRegression(random_state=42)
+    
     pipeline = Pipeline(steps=[
-        ("preprocessor",preprocessor),
-        ("model",model)
+        ("feature_engineering", housing_preprocessor),
+        ("preprocessor", preprocessor),
+        ("model", model)
     ])
     return pipeline
 
