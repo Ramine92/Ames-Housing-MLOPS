@@ -52,7 +52,7 @@ def get_pipeline(X,model_name):
     if model_name == "Ridge":
         model = Ridge(random_state=42)
     elif model_name == "LinearRegression":
-        model = LinearRegression(random_state=42)
+        model = LinearRegression()
     
     pipeline = Pipeline(steps=[
         ("feature_engineering", housing_preprocessor),
@@ -102,8 +102,9 @@ if __name__ == "__main__":
         mlflow.log_metric("R2_score",rs["r2_score"])
         mlflow.log_metric("MSE",rs["mean_squared_error"])
         mlflow.log_metric("RMSE",rs["root_mean_squared_error"])
-        best_alpha = model.best_params_["model__alpha"]
-        mlflow.log_metric("best_alpha",best_alpha)
+        if hasattr(model,"best_params_"):
+            best_alpha = model.best_params_["model__alpha"]
+            mlflow.log_param("best_alpha",best_alpha)
         mlflow.sklearn.log_model(model,f"{model_name}")
         save_model(model,model_name,version)
 
