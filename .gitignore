@@ -16,6 +16,7 @@ ml/data/
 *.pkl
 *.model
 *.joblib
+mlruns/
 
 # Jupyter Notebooks
 .ipynb_checkpoints

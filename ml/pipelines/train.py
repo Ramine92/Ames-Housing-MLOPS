@@ -5,8 +5,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
-from sklearn.metrics import r2_score,mean_squared_error,root_mean_squared_error
+from sklearn.metrics import r2_score,mean_squared_error
 from ml.features.preprocessing import housing_preprocessor
+import mlflow
 from pathlib import Path
 import numpy as np
 import joblib
@@ -89,13 +90,22 @@ def save_model(model,model_name,version):
     joblib.dump(model, artifacts_path / f"{model_name}_{version}.pkl")
     print(f"model saved succefully {model_name}")
 if __name__ == "__main__":
+    mlflow.set_tracking_uri("file://"+str(BASE_DIR/"mlruns"))
+    mlflow.set_experiment("Ames_Housing_Regression")
     X,y = load_data(DATA_PATH)
     model_name = "Ridge"
     version = "v1"
-    model,X_test,y_test = train_model(X,y,model_name)
-    rs = evaluate_model(model,X_test,y_test)
-    print(rs)
-    save_model(model,model_name,version)
+    with mlflow.start_run(run_name=f"{model_name}_{version}"):
+        model,X_test,y_test = train_model(X,y,model_name)
+        rs = evaluate_model(model,X_test,y_test)
+        print(rs)
+        mlflow.log_metric("R2_score",rs["r2_score"])
+        mlflow.log_metric("MSE",rs["mean_squared_error"])
+        mlflow.log_metric("RMSE",rs["root_mean_squared_error"])
+        best_alpha = model.best_params_["model__alpha"]
+        mlflow.log_metric("best_alpha",best_alpha)
+        mlflow.sklearn.log_model(model,f"{model_name}")
+        save_model(model,model_name,version)
 
 
 
