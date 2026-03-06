@@ -9,15 +9,14 @@ venv.bak/
 ml_project_env/
 
 # Data and models
-data/
-ml/data/
 *.csv
 *.parquet
 *.pkl
 *.model
 *.joblib
 mlruns/
-
+!*.dvc
+!*.dvc/
 # Jupyter Notebooks
 .ipynb_checkpoints
 
