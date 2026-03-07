@@ -1,5 +1,3 @@
-import numpy as np 
-import pandas as pd
 from sklearn.preprocessing import FunctionTransformer
 
 def _clean_and_enginner(X):
@@ -13,8 +11,6 @@ def _clean_and_enginner(X):
                  'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF','TotalBsmtSF', 
                  'BsmtFullBath', 'BsmtHalfBath', 'MasVnrArea']
     
-    cols_mode = ['MSZoning', 'Electrical', 'KitchenQual', 'Exterior1st', 
-                 'Exterior2nd', 'SaleType']
 
     for col in cols_none:
         if col in df.columns:
@@ -24,12 +20,6 @@ def _clean_and_enginner(X):
         if col in df.columns:
             df[col] = df[col].fillna(0)
 
-    for col in cols_mode:
-        if col in df.columns:
-            df[col] = df[col].fillna(df[col].mode()[0])
-
-    if "LotFrontage" in df.columns and "Neighborhood" in df.columns:
-        df["LotFrontage"] = df.groupby("Neighborhood")["LotFrontage"].transform(lambda x: x.fillna(x.median()))
 
     # --- FEATURE ENGINEERING ---
     if all(col in df.columns for col in ["TotalBsmtSF", "1stFlrSF", "2ndFlrSF"]):

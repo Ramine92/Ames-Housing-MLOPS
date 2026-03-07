@@ -6,6 +6,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
 from sklearn.metrics import r2_score,mean_squared_error
+from app.core.config import MODEL_NAME,MODEL_VERSION
 from ml.features.preprocessing import housing_preprocessor
 import mlflow
 from pathlib import Path
@@ -93,10 +94,8 @@ if __name__ == "__main__":
     mlflow.set_tracking_uri("file://"+str(BASE_DIR/"mlruns"))
     mlflow.set_experiment("Ames_Housing_Regression")
     X,y = load_data(DATA_PATH)
-    model_name = "Ridge"
-    version = "v1"
-    with mlflow.start_run(run_name=f"{model_name}_{version}"):
-        model,X_test,y_test = train_model(X,y,model_name)
+    with mlflow.start_run(run_name=f"{MODEL_NAME}_{MODEL_VERSION}"):
+        model,X_test,y_test = train_model(X,y,MODEL_NAME)
         rs = evaluate_model(model,X_test,y_test)
         print(rs)
         mlflow.log_metric("R2_score",rs["r2_score"])
@@ -105,8 +104,8 @@ if __name__ == "__main__":
         if hasattr(model,"best_params_"):
             best_alpha = model.best_params_["model__alpha"]
             mlflow.log_param("best_alpha",best_alpha)
-        mlflow.sklearn.log_model(model,f"{model_name}")
-        save_model(model,model_name,version)
+        mlflow.sklearn.log_model(model,f"{MODEL_NAME}")
+        save_model(model,MODEL_NAME,MODEL_VERSION)
 
 
 
