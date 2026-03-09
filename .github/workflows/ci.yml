@@ -32,7 +32,7 @@ jobs:
             run: |
               dvc remote modify origin --local access_key_id $DAGSHUB_TOKEN
               dvc remote modify origin --local secret_access_key $DAGSHUB_TOKEN
-              dvc pull
+              dvc pull -r origin
           
           - name: Run tests with pytest
             run: pytest tests/ -v
