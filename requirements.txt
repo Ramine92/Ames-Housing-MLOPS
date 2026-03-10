@@ -5,6 +5,7 @@ aiohttp-retry==2.9.1
 aioitertools==0.13.0
 aiosignal==1.4.0
 alembic==1.18.4
+altair==6.0.0
 amqp==5.3.1
 annotated-doc==0.0.4
 annotated-types==0.7.0
@@ -96,6 +97,8 @@ jedi==0.19.2
 Jinja2==3.1.6
 jmespath==1.1.0
 joblib==1.5.3
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
 jupyter_client==8.8.0
 jupyter_core==5.9.1
 kiwisolver==1.4.9
@@ -110,6 +113,7 @@ mlflow==3.10.1
 mlflow-skinny==3.10.1
 mlflow-tracing==3.10.1
 multidict==6.7.1
+narwhals==2.18.0
 nest-asyncio==1.6.0
 networkx==3.6.1
 numpy==2.4.2
@@ -143,6 +147,7 @@ pycparser==3.0
 pydantic==2.12.5
 pydantic-settings==2.13.1
 pydantic_core==2.41.5
+pydeck==0.9.1
 pydot==4.0.1
 PyDrive2==1.21.3
 pygit2==1.19.1
@@ -156,8 +161,10 @@ python-dotenv==1.2.2
 pytz==2026.1.post1
 PyYAML==6.0.3
 pyzmq==27.1.0
+referencing==0.37.0
 requests==2.32.5
 rich==14.3.3
+rpds-py==0.30.0
 rsa==4.9.1
 ruamel.yaml==0.19.1
 s3fs==2026.2.0
@@ -178,8 +185,11 @@ sqlparse==0.5.5
 sqltrie==0.11.2
 stack-data==0.6.3
 starlette==0.52.1
+streamlit==1.55.0
 tabulate==0.10.0
+tenacity==9.1.4
 threadpoolctl==3.6.0
+toml==0.10.2
 tomlkit==0.14.0
 tornado==6.5.4
 tqdm==4.67.3
