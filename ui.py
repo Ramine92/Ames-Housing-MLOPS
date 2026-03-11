@@ -91,7 +91,7 @@ with col2:
             "BldgType":BldgType,
         }
         with st.spinner("Predicting..."):
-            response = requests.post(f"http://{API_URL}/predict",json=payload)
+            response = requests.post(f"{API_URL}/predict",json=payload)
 
         if response.status_code == 200:
             price = response.json()["predicted_price"]
