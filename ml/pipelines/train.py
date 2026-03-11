@@ -1,6 +1,8 @@
+from sklearn.ensemble import RandomForestRegressor
 from pandas.core.common import random_state
 from sklearn.model_selection import GridSearchCV,train_test_split,cross_validate
 from sklearn.linear_model import Ridge,LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -54,6 +56,8 @@ def get_pipeline(X,model_name):
         model = Ridge(random_state=42)
     elif model_name == "LinearRegression":
         model = LinearRegression()
+    elif model_name == "RandomForestRegressor":
+        model = RandomForestRegressor()
     
     pipeline = Pipeline(steps=[
         ("feature_engineering", housing_preprocessor),

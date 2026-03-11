@@ -5,6 +5,11 @@ class PredictionRequest(BaseModel):
     Neighborhood: str
     OverallQual: int
     YearBuilt: int
+    YrSold: int
+    GrLivArea: float
+    FullBath: int
+    Fireplaces: int
+    YearRemodAdd: int
     TotalBsmtSF: float
     FirstFlrSF: float
     SecondFlrSF: float

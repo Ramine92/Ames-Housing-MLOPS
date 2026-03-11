@@ -1,67 +1,48 @@
 from matplotlib.pyplot import step
 import streamlit as st
+from app.core.config import API_URL
 import pandas as pd
 import requests
 
 st.set_page_config(page_title="Ames Housing Price Predictor",page_icon="🏠",layout="wide")
 st.title("🏠 Ames Housing Price Predictor")
 col1,col2 = st.columns([1,1.5])
-# Neighborhood coordinates (Ames, Iowa approximate centroids)
+# Real Ames Housing dataset neighborhood codes with Ames, Iowa coordinates
 NEIGHBORHOOD_COORDS = {
-    # Original neighborhoods from your request
-    "NAmes": (42.034722, -93.620278),      # North Ames general area
-    "CollgCr": (42.021328, -93.685522),    # College Creek
-    "OldTown": (42.028890, -93.613330),    # Old Town Historic District
-    "Edwards": (42.048550, -93.694489),    # Edwards neighborhood (50014 area)
-    "Somerst": (42.033610, -93.588270),    # Somerset (50010 area)
-    
-    # Additional neighborhoods
-    "ParkviewHeights": (42.038056, -93.619167),   # Parkview Heights area
-    "Allenview": (42.036111, -93.625000),         # Allenview area
-    "BloomingtonHts": (42.039722, -93.590278),    # Bloomington Heights
-    "Campustown": (42.023333, -93.646389),        # South of ISU campus
-    "CollegeCreek": (42.021111, -93.685556),      # Alternate/expanded College Creek
-    "CollegeHeights": (42.025556, -93.609722),    # College Heights
-    "CollegePark": (42.020000, -93.603889),       # College Park
-    "ColonialVillage": (42.035000, -93.640556),   # Colonial Village
-    "CountryGables": (42.031389, -93.665278),     # Country Gables
-    "Dauntless": (42.031944, -93.602222),         # Dauntless area
-    "DaytonPark": (42.033889, -93.593889),        # Dayton Park
-    "EastHickoryPark": (42.043333, -93.588611),   # East Hickory Park
-    "EstatesWest": (42.037222, -93.671944),       # Estates West
-    "GatewayGreenHills": (42.018889, -93.651389), # Gateway Green Hills
-    "GatewayHills": (42.019444, -93.649444),      # Gateway Hills
-    "Hillside": (42.031111, -93.615278),          # Hillside area
-    "ISU": (42.026667, -93.646944),               # Iowa State University
-    "LittleHollywood": (42.029722, -93.628333),   # Little Hollywood
-    "MainStreet": (42.027222, -93.615278),        # Main Street Cultural District
-    "MelrosePark": (42.034722, -93.650000),       # Melrose Park
-    "NorthridgeHeights": (42.047222, -93.619167), # Northridge Heights
-    "NorthridgeParkway": (42.045556, -93.618333), # Northridge Parkway
-    "Oakwood": (42.039167, -93.605556),           # Oakwood (50010 area)
-    "OntarioHeights": (42.041389, -93.628889),    # Ontario Heights
-    "Ridgewood": (42.036111, -93.632222),         # Ridgewood
-    "RinggenbergPark": (42.044444, -93.623611),   # Ringgenberg Park
-    "Roosevelt": (42.030583, -93.623639),         # Roosevelt neighborhood (near school)
-    "SouthFork": (42.016944, -93.608889),         # South Fork
-    "SouthGateway": (42.018056, -93.643333),      # South Gateway
-    "SpringValley": (42.034167, -93.676111),      # Spring Valley
-    "StoneBrooke": (42.036944, -93.581944),       # Stone Brooke (upscale area)
-    "Suncrest": (42.032778, -93.623889),          # Suncrest
-    "SunsetRidge": (42.043889, -93.610000),       # Sunset Ridge
-    "TheReserve": (42.026111, -93.664444),        # The Reserve
-    "WestAmes": (42.024000, -93.663000),          # West Ames (50014 centroid)
-    
-    # General area descriptors
-    "Downtown": (42.027222, -93.615278),          # Downtown Ames
-    "NorthAmes": (42.034722, -93.620278),         # North Ames general
-    "SouthAmes": (42.018889, -93.635556),         # South Ames general
-    "WestAmesGeneral": (42.024000, -93.663000),   # West Ames general
+    "NAmes":    (42.0347, -93.6203),   # North Ames
+    "CollgCr":  (42.0213, -93.6855),   # College Creek
+    "OldTown":  (42.0289, -93.6133),   # Old Town
+    "Edwards":  (42.0275, -93.6611),   # Edwards
+    "Somerst":  (42.0611, -93.6189),   # Somerset
+    "NridgHt":  (42.0533, -93.6561),   # Northridge Heights  
+    "Gilbert":  (42.1100, -93.6480),   # Gilbert
+    "Sawyer":   (42.0347, -93.6525),   # Sawyer
+    "NWAmes":   (42.0500, -93.6650),   # Northwest Ames
+    "SawyerW":  (42.0347, -93.6700),   # Sawyer West
+    "BrkSide":  (42.0219, -93.6078),   # Brookside
+    "Crawfor":  (42.0244, -93.5986),   # Crawford
+    "Mitchel":  (42.0100, -93.6100),   # Mitchell
+    "NoRidge":  (42.0500, -93.6400),   # Northridge           
+    "Timber":   (42.0019, -93.6572),   # Timberland
+    "IDOTRR":   (42.0239, -93.6214),   # Iowa DOT & Rail Road
+    "ClearCr":  (42.0083, -93.6761),   # Clear Creek
+    "StoneBr":  (42.0608, -93.6461),   # Stone Brook           
+    "SWISU":    (42.0161, -93.6597),   # SW of Iowa State
+    "Blmngtn":  (42.0597, -93.6161),   # Bloomington Heights
+    "MeadowV":  (41.9939, -93.6564),   # Meadow Village
+    "BrDale":   (42.0572, -93.6022),   # Briardale
+    "Veenker":  (42.0444, -93.6486),   # Veenker              
+    "NPkVill":  (42.0572, -93.6089),   # Northpark Village
+    "Blueste":  (42.0211, -93.6339),   # Bluestem
 }
 with col1:
     OverallQuall = st.slider("Overall Quality (1-10)",min_value=1,max_value=10,value=5)
 
     YearBuilt = st.number_input("Year Built",min_value=1872,max_value=2010,value=2000,step=1)
+
+    YrSold = st.number_input("Year Sold",value=2026)
+
+    YearRemodAdd = st.number_input("Year Since Remodel",min_value=1900)
 
     TotalBsmtSF = st.number_input("Total Basement SF",min_value=0.0,value=800.0)
 
@@ -72,6 +53,12 @@ with col1:
     BldgType = st.selectbox("Building Type",["1Fam", "2fmCon", "Duplex", "TwnhsE", "Twnhs"])
 
     GarageCars = st.slider("Number Of Cars",min_value=0,max_value=5)
+
+    GrLivArea = st.number_input("Above Ground Living Area (sqft)",min_value=0.0,value=1500.0)
+
+    FullBath = st.number_input("Full Bathrooms",min_value=0,max_value=6,value=2,step=1)
+
+    Fireplaces = st.number_input("Fireplaces",min_value=0,max_value=5,value=0,step=1)
 
     PoolQC = st.selectbox("Pool Quality",["missing","Ex","Gd","TA","Fa"])
 
@@ -90,16 +77,21 @@ with col2:
         payload={
             "Neighborhood":Neighborhood,
             "OverallQual":OverallQuall,
+            "YrSold":YrSold,
+            "YearRemodAdd":YearRemodAdd,
             "YearBuilt":YearBuilt,
             "TotalBsmtSF":TotalBsmtSF,
             "FirstFlrSF":FirstFlrSF,
             "SecondFlrSF":SecondFlrSF,
             "GarageCars":GarageCars,
+            "GrLivArea":GrLivArea,
+            "FullBath":FullBath,
+            "Fireplaces":Fireplaces,
             "PoolQC":PoolQC,
             "BldgType":BldgType,
         }
         with st.spinner("Predicting..."):
-            response = requests.post("http://localhost:8000/predict",json=payload)
+            response = requests.post(f"http://{API_URL}/predict",json=payload)
 
         if response.status_code == 200:
             price = response.json()["predicted_price"]
