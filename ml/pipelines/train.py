@@ -1,6 +1,5 @@
 from sklearn.ensemble import RandomForestRegressor
-from pandas.core.common import random_state
-from sklearn.model_selection import GridSearchCV,train_test_split,cross_validate
+from sklearn.model_selection import GridSearchCV,train_test_split
 from sklearn.linear_model import Ridge,LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
@@ -16,7 +15,7 @@ import numpy as np
 import joblib
 import pandas as pd 
 
-
+dagshub.init(repo_owner='Ramine92', repo_name='Ames-Housing-MLOPS', mlflow=True)
 BASE_DIR = Path(__file__).parent.parent.parent # root directory
 DATA_PATH = BASE_DIR / "ml" / "data" / "raw" / "train.csv" 
 

@@ -1,4 +1,3 @@
-from matplotlib.pyplot import step
 import streamlit as st
 from app.core.config import API_URL
 import pandas as pd
