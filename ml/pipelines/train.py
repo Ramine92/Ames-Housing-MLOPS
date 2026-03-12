@@ -10,12 +10,15 @@ from sklearn.metrics import r2_score,mean_squared_error
 from app.core.config import MODEL_NAME,MODEL_VERSION
 from ml.features.preprocessing import housing_preprocessor
 import mlflow
+import dagshub
 from pathlib import Path
 import numpy as np
 import joblib
 import pandas as pd 
 
 dagshub.init(repo_owner='Ramine92', repo_name='Ames-Housing-MLOPS', mlflow=True)
+mlflow.set_experiment("Ames-Housing-Pricing")
+
 BASE_DIR = Path(__file__).parent.parent.parent # root directory
 DATA_PATH = BASE_DIR / "ml" / "data" / "raw" / "train.csv" 
 
@@ -94,8 +97,6 @@ def save_model(model,model_name,version):
     joblib.dump(model, artifacts_path / f"{model_name}_{version}.pkl")
     print(f"model saved succefully {model_name}")
 if __name__ == "__main__":
-    mlflow.set_tracking_uri("file://"+str(BASE_DIR/"mlruns"))
-    mlflow.set_experiment("Ames_Housing_Regression")
     X,y = load_data(DATA_PATH)
     with mlflow.start_run(run_name=f"{MODEL_NAME}_{MODEL_VERSION}"):
         model,X_test,y_test = train_model(X,y,MODEL_NAME)
